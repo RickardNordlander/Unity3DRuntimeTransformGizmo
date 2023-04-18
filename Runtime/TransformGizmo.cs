@@ -80,6 +80,7 @@ namespace RuntimeGizmos
 		public int maxUndoStored = 100;
 
 		public bool manuallyHandleGizmo;
+		public bool selectionOnClick;
 
 		public LayerMask selectionMask = Physics.DefaultRaycastLayers;
 
@@ -630,7 +631,7 @@ namespace RuntimeGizmos
 	
 		void GetTarget()
 		{
-			if(nearAxis == Axis.None && Input.GetMouseButtonDown(0))
+			if(nearAxis == Axis.None && Input.GetMouseButtonDown(0) && selectionOnClick)
 			{
 				bool isAdding = Input.GetKey(AddSelection);
 				bool isRemoving = Input.GetKey(RemoveSelection);
