@@ -125,13 +125,12 @@ namespace RuntimeGizmos
 		WaitForEndOfFrame waitForEndOFFrame = new WaitForEndOfFrame();
 		Coroutine forceUpdatePivotCoroutine;
 
-		static Material lineMaterial;
-		static Material outlineMaterial;
+		[SerializeField] private Material lineMaterial;
+		[SerializeField] private Material outlineMaterial;
 
 		void Awake()
 		{
 			myCamera = GetComponent<Camera>();
-			SetMaterial();
 		}
 
 		void OnEnable()
@@ -186,7 +185,7 @@ namespace RuntimeGizmos
 			}
 		}
 
-		void OnPostRender()
+		void OnRenderObject()
 		{
 			if(mainTargetRoot == null || manuallyHandleGizmo) return;
 
@@ -726,7 +725,7 @@ namespace RuntimeGizmos
 						materialsBuffer.Clear();
 						materialsBuffer.AddRange(render.sharedMaterials);
 
-						if(!materialsBuffer.Contains(outlineMaterial))
+						if(!materialsBuffer.Contains(outlineMaterial) && outlineMaterial != null)
 						{
 							materialsBuffer.Add(outlineMaterial);
 							render.materials = materialsBuffer.ToArray();
@@ -779,7 +778,7 @@ namespace RuntimeGizmos
 					materialsBuffer.Clear();
 					materialsBuffer.AddRange(render.sharedMaterials);
 
-					if(materialsBuffer.Contains(outlineMaterial))
+					if(materialsBuffer.Contains(outlineMaterial) && outlineMaterial != null)
 					{
 						materialsBuffer.Remove(outlineMaterial);
 						render.materials = materialsBuffer.ToArray();
@@ -1411,15 +1410,6 @@ namespace RuntimeGizmos
 			}
 
 			GL.End();
-		}
-
-		void SetMaterial()
-		{
-			if(lineMaterial == null)
-			{
-				lineMaterial = new Material(Shader.Find("Custom/Lines"));
-				outlineMaterial = new Material(Shader.Find("Custom/Outline"));
-			}
 		}
 	}
 }
