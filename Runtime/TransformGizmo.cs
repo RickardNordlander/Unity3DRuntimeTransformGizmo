@@ -131,7 +131,7 @@ namespace RuntimeGizmos
 		[SerializeField] private Material outlineMaterial;
 
 		// If the camera renders to a rendertexture in the UI, this should be set to the RectTransform of the RawImage.
-		[SerializeField] private RectTransform RenderRect;
+		public RectTransform RenderRect;
 
 		void Awake()
 		{
