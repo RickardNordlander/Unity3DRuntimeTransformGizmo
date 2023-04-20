@@ -133,6 +133,9 @@ namespace RuntimeGizmos
 		// If the camera renders to a rendertexture in the UI, this should be set to the RectTransform of the RawImage.
 		public RectTransform RenderRect;
 
+		public Action AxisGrabbed;
+		public Action AxisReleased;
+
 		void Awake()
 		{
 			myCamera = GetComponent<Camera>();
@@ -373,6 +376,11 @@ namespace RuntimeGizmos
 		
 		IEnumerator TransformSelected(TransformType transType)
 		{
+			if (AxisGrabbed != null)
+			{
+				AxisGrabbed.Invoke();
+			}
+
 			isTransforming = true;
 			totalScaleAmount = 0;
 			totalRotationAmount = Quaternion.identity;
@@ -590,6 +598,11 @@ namespace RuntimeGizmos
 			SetTranslatingAxis(transformType, Axis.None);
 
 			SetPivotPoint();
+
+			if (AxisReleased != null)
+			{
+				AxisReleased.Invoke();
+			}
 		}
 
 		float CalculateSnapAmount(float snapValue, float currentAmount, out float remainder)
