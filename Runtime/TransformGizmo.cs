@@ -130,6 +130,9 @@ namespace RuntimeGizmos
 		[SerializeField] private Material lineMaterial;
 		[SerializeField] private Material outlineMaterial;
 
+		// If the camera renders to a rendertexture in the UI, this should be set to the RectTransform of the RawImage.
+		[SerializeField] private RectTransform RenderRect;
+
 		void Awake()
 		{
 			myCamera = GetComponent<Camera>();
@@ -394,7 +397,7 @@ namespace RuntimeGizmos
 
 			while(!Input.GetMouseButtonUp(0))
 			{
-				Ray mouseRay = myCamera.ScreenPointToRay(Input.mousePosition);
+				Ray mouseRay = RayCastToScreen();
 				Vector3 mousePosition = Geometry.LinePlaneIntersect(mouseRay.origin, mouseRay.direction, originalPivot, planeNormal);
 				bool isSnapping = Input.GetKey(translationSnapping);
 
@@ -645,7 +648,7 @@ namespace RuntimeGizmos
 				bool isRemoving = Input.GetKey(RemoveSelection);
 
 				RaycastHit hitInfo; 
-				if(Physics.Raycast(myCamera.ScreenPointToRay(Input.mousePosition), out hitInfo, Mathf.Infinity, selectionMask))
+				if(Physics.Raycast(RayCastToScreen(), out hitInfo, Mathf.Infinity, selectionMask))
 				{
 					Transform target = hitInfo.transform;
 
@@ -1022,7 +1025,7 @@ namespace RuntimeGizmos
 			else if(zClosestDistance <= minSelectedDistanceCheck && zClosestDistance <= xClosestDistance && zClosestDistance <= yClosestDistance) SetTranslatingAxis(type, Axis.Z);
 			else if(type == TransformType.Rotate && mainTargetRoot != null)
 			{
-				Ray mouseRay = myCamera.ScreenPointToRay(Input.mousePosition);
+				Ray mouseRay = RayCastToScreen();
 				Vector3 mousePlaneHit = Geometry.LinePlaneIntersect(mouseRay.origin, mouseRay.direction, pivotPoint, (transform.position - pivotPoint).normalized);
 				if((pivotPoint - mousePlaneHit).sqrMagnitude <= (GetHandleLength(TransformType.Rotate)).Squared()) SetTranslatingAxis(type, Axis.Any);
 			}
@@ -1030,7 +1033,7 @@ namespace RuntimeGizmos
 
 		float ClosestDistanceFromMouseToLines(List<Vector3> lines)
 		{
-			Ray mouseRay = myCamera.ScreenPointToRay(Input.mousePosition);
+			Ray mouseRay = RayCastToScreen();
 
 			float closestDistance = float.MaxValue;
 			for(int i = 0; i + 1 < lines.Count; i++)
@@ -1051,7 +1054,7 @@ namespace RuntimeGizmos
 
 			if(planePoints.Count >= 4)
 			{
-				Ray mouseRay = myCamera.ScreenPointToRay(Input.mousePosition);
+				Ray mouseRay = RayCastToScreen();
 
 				for(int i = 0; i < planePoints.Count; i += 4)
 				{
@@ -1094,6 +1097,22 @@ namespace RuntimeGizmos
 
 		//	return float.MaxValue;
 		//}
+
+		private Ray RayCastToScreen()
+		{
+			if (RenderRect != null)
+			{
+				RectTransformUtility.ScreenPointToLocalPointInRectangle(RenderRect, Input.mousePosition, null, out Vector2 localpoint);
+				var isInside = RectTransformUtility.RectangleContainsScreenPoint(RenderRect, Input.mousePosition, null);
+
+				var normalized = Rect.PointToNormalized(RenderRect.rect, localpoint);
+				return myCamera.ViewportPointToRay(new Vector3(normalized.x, normalized.y, 0));
+			}
+			else
+			{
+				return myCamera.ScreenPointToRay(Input.mousePosition);
+			}
+		}
 
 		void SetAxisInfo()
 		{
