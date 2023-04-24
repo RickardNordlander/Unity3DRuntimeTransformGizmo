@@ -141,14 +141,17 @@ namespace RuntimeGizmos
 			myCamera = GetComponent<Camera>();
 		}
 
-		private void RenderPipelineManager_endFrameRendering(ScriptableRenderContext context, Camera[] camera)
+		private void OnEndCameraRendering(ScriptableRenderContext context, Camera camera)
 		{
-			OnPostRender();
+			if (camera == myCamera)
+			{
+				OnPostRender();
+			}
 		}
 
 		void OnEnable()
 		{
-			RenderPipelineManager.endFrameRendering += RenderPipelineManager_endFrameRendering;
+			RenderPipelineManager.endCameraRendering += OnEndCameraRendering;
 			forceUpdatePivotCoroutine = StartCoroutine(ForceUpdatePivotPointAtEndOfFrame());
 		}
 
@@ -156,7 +159,7 @@ namespace RuntimeGizmos
 		{
 			ClearTargets(); //Just so things gets cleaned up, such as removing any materials we placed on objects.
 
-			RenderPipelineManager.endFrameRendering -= RenderPipelineManager_endFrameRendering;
+			RenderPipelineManager.endCameraRendering -= OnEndCameraRendering;
 			StopCoroutine(forceUpdatePivotCoroutine);
 		}
 
